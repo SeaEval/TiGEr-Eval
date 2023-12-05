@@ -1,5 +1,8 @@
 # TiGEr: Text Generation Evaluation toolkit
 
+![alt text](asset/tiger.png)
+
+
 We can build a toolkit to evaluate all kinds of generations
 
 
