@@ -1,4 +1,4 @@
-# TiGEr: Text Generation Evaluation toolkit
+# TiGEr: Text Generation Evaluation Toolkit
 
 <p align="center">
   <img src="asset/tiger.png" width="250">
