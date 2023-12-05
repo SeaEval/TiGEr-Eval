@@ -1,4 +1,4 @@
-# NLG-Assess_dev
+# TiGEr: Text Generation Evaluation toolkit
 
 We can build a toolkit to evaluate all kinds of generations
 
