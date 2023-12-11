@@ -7,10 +7,16 @@
 </p>
 
 
-# Installation
+# Installation (from Pypi)
 
 ```
 pip install tiger-eval
+```
+
+# Installation (from source)
+
+```
+pip install ./
 ```
 
 # x
