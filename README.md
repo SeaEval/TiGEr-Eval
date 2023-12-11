@@ -4,8 +4,14 @@
   <img src="asset/tiger.png" width="250">
 </p>
 
-We can build a toolkit to evaluate all kinds of generations
+**TiGEr is all you need to evaluation your generated text!**
 
+# Installation
+```
+pip install .
+```
+
+# x
 
 The toolkit should support various metrics
 
