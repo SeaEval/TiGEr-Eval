@@ -1,10 +1,11 @@
 # TiGEr: Text Generation Evaluation Toolkit
 
+**TiGEr is all you need** for text generation evaluation.
+
 <p align="center">
   <img src="asset/tiger.png" width="250">
 </p>
 
-**TiGEr is all you need to evaluate the generated text!**
 
 # Installation
 
