@@ -10,7 +10,7 @@
 # Installation
 
 ```
-pip install .
+pip install tiger-eval
 ```
 
 # x
