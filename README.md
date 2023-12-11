@@ -4,9 +4,10 @@
   <img src="asset/tiger.png" width="250">
 </p>
 
-**TiGEr is all you need to evaluation your generated text!**
+**TiGEr is all you need to evaluate the generated text!**
 
 # Installation
+
 ```
 pip install .
 ```
