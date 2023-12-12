@@ -22,7 +22,7 @@ pip install .
 
 # TODO
 
-1. start with cross lingual evaluation
+- start with cross lingual evaluation
 
 The toolkit should support various metrics
 
