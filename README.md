@@ -1,4 +1,4 @@
-# TiGEr: Text Generation Evaluation Toolkit
+# TiGEr-Eval: Text Generation Evaluation Toolkit
 
 **TiGEr is all you need** for text generation evaluation.
 
