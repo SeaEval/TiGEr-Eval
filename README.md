@@ -1,25 +1,28 @@
-# TiGEr: Text Generation Evaluation Toolkit
-
-**TiGEr is all you need** for text generation evaluation.
-
+# TiGEr-Eval: Text Generation Evaluation Toolkit
 <p align="center">
   <img src="asset/tiger.png" width="250">
 </p>
 
+# Overview
 
-# Installation (from Pypi)
+**TiGEr is all you need** for text generation evaluation. XXX
+
+
+# Installation (from Pypi, stable version, recommended)
 
 ```
 pip install tiger-eval
 ```
 
-# Installation (from source)
+# Installation (from source, unstable version)
 
 ```
-pip install ./
+pip install .
 ```
 
-# x
+# TODO
+
+1. start with cross lingual evaluation
 
 The toolkit should support various metrics
 
