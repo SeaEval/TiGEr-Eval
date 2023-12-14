@@ -49,6 +49,10 @@ import sys
 #import reader
 #from reader import feed, viewer
 
+import cross_lingual_assessment
+
+
+
 
 def main() -> None:
     print('this goes here')
