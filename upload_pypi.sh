@@ -8,7 +8,7 @@ python -m build
 
 twine check dist/*
 
-twine upload -r testpypi dist/*
+#twine upload -r testpypi dist/*
 
 # install from test channel
 # pip install -i https://test.pypi.org/simple tiger-eval
@@ -16,4 +16,4 @@ twine upload -r testpypi dist/*
 
 
 # Final upload to pypi
-# twine upload dist/* 
+twine upload dist/* 

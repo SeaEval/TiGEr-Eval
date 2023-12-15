@@ -11,3 +11,6 @@ logging.basicConfig(
 # =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 
 
 from .cross_lingual_assessment import *
+from .multichoice_question import *
+from .open_question_model_judge import *
+from .translation_bleu import *

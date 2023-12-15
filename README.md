@@ -1,14 +1,15 @@
 # TiGEr-Eval: Text Generation Evaluation Toolkit
+
 <p align="center">
   <img src="asset/tiger.png" width="250">
 </p>
 
 # Overview
 
-**TiGEr is all you need** for text generation evaluation. XXX
+**TiGEr** toolkit for text generation evaluation.
 
 
-# Installation (from Pypi, stable version, recommended)
+# Installation (from Pypi, recommended)
 
 ```
 pip install tiger-eval
@@ -20,16 +21,25 @@ pip install tiger-eval
 pip install .
 ```
 
+# Done
+
+- Cross-lingual Consistency
+
+- Multichoice question evaluation
+
+- Open generation evaluation (with llama-2-7b-chat only)
+
+- BLEU score
+
 # TODO
 
-- start with cross lingual evaluation
 
 The toolkit should support various metrics
 
-1. N-Gram / keyword matching: ROUGE, BLEU, etc
+1. ROUGE, BLEU
 
 2. Model based: BERTScore, BLEURT
 
-3. Open Generation
+3. Open Generation, need to be further improved
 
-4. For multichoice questions: etc
+4. For multichoice questions. Other matching techniques? E.g. use model to reformat the answer?
