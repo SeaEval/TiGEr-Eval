@@ -11,6 +11,10 @@ def simple_segment(text):
         all_segments = []
         for sent in re.findall(u'[^!?。\.\!\?]+[!?。\.\!\?]?', text, flags=re.U):
             all_segments.append(sent)
+
+        if len(all_segments) == 0:
+            all_segments.append('nothing here actually')
+
         return all_segments
 
 def replace_chinese_punctuation_with_english(text):
