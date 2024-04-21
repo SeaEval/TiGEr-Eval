@@ -2,7 +2,7 @@
 import torch
 import transformers
 
-def llama_generate(model, tokenizer, batch_input):
+def llm_generate(model, tokenizer, batch_input):
     max_new_tokens = 100
     formatted_batch_input = []
     for input in batch_input:
@@ -42,7 +42,7 @@ def score(model_path, data_with_model_prediction):
     all_scores = []
     for sample in data_with_model_prediction:
         batch_input = ["Please rate the quality (whether it is correct and helpful) of the generated answer from 1.0 to 5.0.\n\nQuestion:\n{}\n\nAnswer:\n{}\n".format(sample['question'], sample['model_prediction'])]
-        eval_model_prediction = llama_generate(model, tokenizer, batch_input)[0]
+        eval_model_prediction = llm_generate(model, tokenizer, batch_input)[0]
 
         if any([item in eval_model_prediction for item in ['1.0', '2.0', '3.0', '4.0', '5.0']]):
 
