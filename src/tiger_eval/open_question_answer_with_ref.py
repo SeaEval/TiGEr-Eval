@@ -2,56 +2,80 @@
 import torch
 import transformers
 
-def llm_generate(model, tokenizer, batch_input):
-    max_new_tokens = 100
-    formatted_batch_input = []
-    for input in batch_input:
-        dialog = [{"role": "user", "content": input}]
-        B_INST, E_INST = "[INST]", "[/INST]"
-        formatted_batch_input.extend([f"{B_INST} {(dialog[-1]['content']).strip()} {E_INST}"])
-    batch_input = formatted_batch_input
 
-    generation_config                = model.generation_config
-    generation_config.max_new_tokens = max_new_tokens
-    input_ids                        = tokenizer(batch_input, return_tensors="pt", padding=True).input_ids.to(model.device)
-    with torch.no_grad():
-        output_ids = model.generate(input_ids, generation_config = generation_config)
-
-    # remove the input_ids from the output_ids
-    output_ids = output_ids[:, input_ids.shape[-1]:]
-    outputs    = tokenizer.batch_decode(output_ids, skip_special_tokens=True)
-    return outputs
-
-
-def score(model_path, data_with_model_prediction):
+def score(model_path, input_data):
     """ Compute the score of the model on the given data."""
 
     # Load tokenizer
     tokenizer = transformers.AutoTokenizer.from_pretrained(model_path, device_map="auto", use_fast=False, padding_side='left')
+    tokenizer.pad_token = tokenizer.eos_token
 
     # Load model
     model = transformers.AutoModelForCausalLM.from_pretrained(model_path, device_map="auto", torch_dtype=torch.float16)
     model.eval() # set to eval mode, by default it is in eval model but just in case
 
-    # Load Pad token
-    if tokenizer.pad_token is None:
-        tokenizer.add_special_tokens({'pad_token': '<unk>'})
-        model.resize_token_embeddings(len(tokenizer))
+    terminators = [
+        tokenizer.eos_token_id,
+        tokenizer.convert_tokens_to_ids("<|eot_id|>")
+    ]
+
+
 
     # generation
-    all_scores = []
-    for sample in data_with_model_prediction:
-        batch_input = ["Please rate the quality (whether it is correct and helpful) of the generated answer from 1.0 to 5.0.\n\nQuestion:\n{}\n\nAnswer:\n{}\n".format(sample['question'], sample['model_prediction'])]
-        eval_model_prediction = llm_generate(model, tokenizer, batch_input)[0]
+    all_details = []
+    questions, references, predictions = input_data
 
-        if any([item in eval_model_prediction for item in ['1.0', '2.0', '3.0', '4.0', '5.0']]):
+    for question, reference, prediction in zip(questions, references, predictions):
 
-            appeared_scores = [float(item) for item in ['1.0', '2.0', '3.0', '4.0', '5.0'] if item in eval_model_prediction]
+        sample_input = "You will be given the question and the reference answer. Please rate the correctness of the generated answer from 1(worst) to 10(best).\n\nQuestion:\n{}\n\nReference Answer:\n{}\n\nGenerated Answer:\n{}\n\n".format(question, reference, prediction)
 
-            all_scores.append(max(appeared_scores))
-        else:
-            all_scores.append(1.0)
+        messages = [
+            {"role": "system", "content": "You are an expert grader who consistently evaluates on a scale from 1(worst) to 10(best)!"},
+            {"role": "user", "content": sample_input},
+        ]
 
-    results = {'llama_score': sum(all_scores) / len(all_scores)}
+        templated_sample = tokenizer.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            return_tensors="pt",
+            tokenize=False,
+        )
+        templated_sample = templated_sample + "My rating score is: "
+        encoded_sample = tokenizer(templated_sample, return_tensors="pt").to(model.device)
+
+        outputs = model.generate(
+            **encoded_sample,
+            max_new_tokens=256,
+            pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=terminators,
+            #do_sample=True,
+            #temperature=0.6,
+            #top_p=0.9,
+        )
+        response = outputs[0][encoded_sample.input_ids.shape[-1]:]
+        output = tokenizer.decode(response, skip_special_tokens=True)
+
+        try:
+            rate_score = float(output.split()[0])
+            success = 1
+        except:
+            rate_score = 0.0
+            success = -1
+
+        sample_rating_detail = {
+            'question'        : question,
+            'reference'       : reference,
+            'model_prediction': prediction,
+            'rate_score'      : rate_score,
+            'success'         : success,
+        }
+
+        all_details.append(sample_rating_detail)
+
+    all_scores   = [detail['rate_score'] for detail in all_details]
+    avg_score    = sum(all_scores) / len(all_scores)
+    success_rate = sum([detail['success'] for detail in all_details]) / len(all_details)
+
+    results = {'llm_score': avg_score, 'success_rate': success_rate, 'details': all_details}
 
     return results

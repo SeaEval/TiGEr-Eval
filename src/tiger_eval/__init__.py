@@ -15,3 +15,4 @@ from .multichoice_question import *
 from .open_question_model_judge import *
 from .translation_bleu import *
 from .rouge import *
+from .open_question_answer_with_ref import *
