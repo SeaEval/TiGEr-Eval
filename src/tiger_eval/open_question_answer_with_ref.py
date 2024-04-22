@@ -47,7 +47,7 @@ def score(model_path, input_data):
 
         outputs = model.generate(
             **encoded_sample,
-            max_new_tokens=256,
+            max_new_tokens=30,
             pad_token_id=tokenizer.eos_token_id,
             eos_token_id=terminators,
             #do_sample=True,
