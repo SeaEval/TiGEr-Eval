@@ -2,6 +2,8 @@
 import torch
 import transformers
 
+from tqdm import tqdm
+
 
 def score(model_path, input_data):
     """ Compute the score of the model on the given data."""
@@ -25,7 +27,7 @@ def score(model_path, input_data):
     all_details = []
     questions, references, predictions = input_data
 
-    for question, reference, prediction in zip(questions, references, predictions):
+    for question, reference, prediction in tqdm(zip(questions, references, predictions), total=len(questions)):
 
         sample_input = "You will be given the question and the reference answer. Please rate the correctness of the generated answer from 1(worst) to 10(best).\n\nQuestion:\n{}\n\nReference Answer:\n{}\n\nGenerated Answer:\n{}\n\n".format(question, reference, prediction)
 
