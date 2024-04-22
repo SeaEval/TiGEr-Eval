@@ -22,17 +22,16 @@ def score(model_path, input_data):
     ]
 
 
-
     # generation
     all_details = []
     questions, references, predictions = input_data
 
     for question, reference, prediction in tqdm(zip(questions, references, predictions), total=len(questions)):
 
-        sample_input = "You will be given the question and the reference answer. Treat the reference answer as the golden truth. Please rate the correctness of the generated answer from 1(worst) to 10(best).\n\nQuestion:\n{}\n\nReference Answer:\n{}\n\nGenerated Answer:\n{}\n\n".format(question, reference, prediction)
+        sample_input = "You will be given the question and the reference answer. Treat the reference answer as the golden truth. Please rate the generated answer as correct or wrong.\n\nQuestion:\n{}\n\nReference Answer:\n{}\n\nGenerated Answer:\n{}\n\n".format(question, reference, prediction)
 
         messages = [
-            {"role": "system", "content": "You are an expert grader who consistently evaluates on a scale from 1(worst) to 10(best)!"},
+            {"role": "system", "content": "You are an expert grader who consistently evaluates on as 'correct' or 'wrong'!"},
             {"role": "user", "content": sample_input},
         ]
 
@@ -42,7 +41,7 @@ def score(model_path, input_data):
             return_tensors="pt",
             tokenize=False,
         )
-        templated_sample = templated_sample + "My rating score is: "
+        templated_sample = templated_sample + "The answer is "
         encoded_sample = tokenizer(templated_sample, return_tensors="pt").to(model.device)
 
         outputs = model.generate(
@@ -58,10 +57,11 @@ def score(model_path, input_data):
         output = tokenizer.decode(response, skip_special_tokens=True)
 
         try:
-            rate_score = float(output.split()[0])
+            if output.startwith('correct'): rate_score = 1.0
+            elif output.startwith('wrong'): rate_score = 0.0
             success = 1
         except:
-            rate_score = 1.0
+            rate_score = 0.0
             success = 0
 
         sample_rating_detail = {
