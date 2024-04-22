@@ -28,7 +28,7 @@ def score(model_path, input_data):
 
     for question, reference, prediction in tqdm(zip(questions, references, predictions), total=len(questions)):
 
-        sample_input = "Check whether the generated answer has exactly the same meaning to the reference answer. Respond with 'Yes' or 'No'.\n\nQuestion:\n{}\n\nReference Answer:\n<<{}>>\n\nGenerated Answer:\n<<{}>>\n\n".format("", reference, prediction)
+        sample_input = "Check whether the generated answer has the same nationality recognized to the reference answer. e.g. American = USA, UK != USA. Respond with 'Yes' or 'No'.\n\nQuestion:\n{}\n\nReference Answer:\n<<{}>>\n\nGenerated Answer:\n<<{}>>\n\n".format("", reference, prediction)
 
         # sample_input = "Check whether the generated answer has the same meaning as the reference answer. Respond with 'Yes' or 'No'.Check whether the generated answer is correct for recognizing the gender of the speaker. The groundtruth is stated in the referene answer. Rate as incorrect if the gender does not match or not stated. Respond with 'Correct' or 'Incorrect'.\n\nQuestion:\n{}\n\nReference Answer:\n<<{}>>\n\nGenerated Answer:\n<<{}>>\n\n".format(question, reference, prediction)
 
@@ -58,6 +58,7 @@ def score(model_path, input_data):
         )
         response = outputs[0][encoded_sample.input_ids.shape[-1]:]
         output   = tokenizer.decode(response, skip_special_tokens=True).strip()
+
 
         try:
             if output.lower().startswith('yes'): rate_score = 1.0

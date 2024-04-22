@@ -18,6 +18,7 @@ from .rouge import *
 from .open_question_answer_with_ref import *
 from .open_question_answer_with_ref_binary import *
 from .open_question_answer_with_ref_binary_gender import *
+from .open_question_answer_with_ref_binary_nationality import *
 
 
 
