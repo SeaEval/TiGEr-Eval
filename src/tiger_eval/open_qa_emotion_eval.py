@@ -68,20 +68,18 @@ def score(model_path, input_data):
 
         outputs = model.generate(
             **encoded_sample,
-            max_new_tokens=10,
+            max_new_tokens=500,
             pad_token_id=tokenizer.eos_token_id,
             eos_token_id=terminators,
             do_sample=False,
         )
-
-        import pdb; pdb.set_trace()
+        
         response = outputs[0][encoded_sample.input_ids.shape[-1]:]
         output   = tokenizer.decode(response, skip_special_tokens=True).strip()
 
+
         try:
-            if output.lower().startswith('yes'): rate_score = 1.0
-            elif output.lower().startswith('no'): rate_score = 0.0
-            else: raise ValueError("Invalid rating")
+            rate_score = float(output.split()[-1])
             success = 1
         except:
             rate_score = 0.0
@@ -91,8 +89,10 @@ def score(model_path, input_data):
             'question'        : question,
             'reference'       : reference,
             'model_prediction': prediction,
+            'judge_response'  : output,
             'rate_score'      : rate_score,
             'success'         : success,
+
         }
 
         all_details.append(sample_rating_detail)
@@ -101,6 +101,6 @@ def score(model_path, input_data):
     avg_score    = sum(all_scores) / len(all_scores)
     success_rate = sum([detail['success'] for detail in all_details]) / len(all_details)
 
-    results = {'llm_score': avg_score, 'success_rate': success_rate, 'details': all_details}
+    judge_results = {'judge_score': avg_score, 'success_rate': success_rate, 'details': all_details}
 
-    return results
+    return judge_results
