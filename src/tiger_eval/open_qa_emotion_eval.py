@@ -1,3 +1,16 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+###
+# Created Date: Tuesday, May 14th 2024, 10:55:12 pm
+# Author: Bin Wang
+# -----
+# Copyright (c) Bin Wang @ bwang28c@gmail.com
+# 
+# -----
+# HISTORY:
+# Date&Time 			By	Comments
+# ----------			---	----------------------------------------------------------
+###
 
 import torch
 import transformers
@@ -21,7 +34,6 @@ def score(model_path, input_data):
         tokenizer.convert_tokens_to_ids("<|eot_id|>")
     ]
 
-
     # generation
     all_details = []
     questions, references, predictions = input_data
@@ -39,18 +51,13 @@ def score(model_path, input_data):
             {reference}
 
             [System]
-            Rate whether the assistant response correctly matches the ground truth.
+            Rate whether the assistant response correctly conveys the meaning of the ground truth.
             The rating should be 1-5, where 1 is incorrect and 5 is correct.
             Your response should be in the format:
             Explanation: (your explanation)
             Rating: (int)"""
         
         evaluation_prompt = PROMPT_TEMPLATE.format(question=question, prediction=prediction, reference=reference)
-
-        #sample_input = "Check whether the generated answer has exactly the same meaning to the reference answer. Respond with 'Yes' or 'No'.\n\nQuestion:\n{}\n\nReference Answer:\n<<{}>>\n\nGenerated Answer:\n<<{}>>\n\n".format("", reference, prediction)
-
-        # sample_input = "Check whether the generated answer has the same meaning as the reference answer. Respond with 'Yes' or 'No'.Check whether the generated answer is correct for recognizing the gender of the speaker. The groundtruth is stated in the referene answer. Rate as incorrect if the gender does not match or not stated. Respond with 'Correct' or 'Incorrect'.\n\nQuestion:\n{}\n\nReference Answer:\n<<{}>>\n\nGenerated Answer:\n<<{}>>\n\n".format(question, reference, prediction)
-
 
         messages = [
             {"role": "system", "content": "You are an expert grader!"},
@@ -63,7 +70,7 @@ def score(model_path, input_data):
             return_tensors="pt",
             tokenize=False,
         )
-        # templated_sample = templated_sample + "Response: "
+
         encoded_sample = tokenizer(templated_sample, return_tensors="pt").to(model.device)
 
         outputs = model.generate(
@@ -82,7 +89,7 @@ def score(model_path, input_data):
             rate_score = float(output.split()[-1])
             success = 1
         except:
-            rate_score = 0.0
+            rate_score = 1.0
             success = 0
 
         sample_rating_detail = {

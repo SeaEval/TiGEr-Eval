@@ -1,3 +1,16 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+###
+# Created Date: Tuesday, May 14th 2024, 10:54:48 pm
+# Author: Bin Wang
+# -----
+# Copyright (c) Bin Wang @ bwang28c@gmail.com
+# 
+# -----
+# HISTORY:
+# Date&Time 			By	Comments
+# ----------			---	----------------------------------------------------------
+###
 
 import torch
 import transformers
@@ -21,19 +34,36 @@ def score(model_path, input_data):
         tokenizer.convert_tokens_to_ids("<|eot_id|>")
     ]
 
-
-
     # generation
     all_details = []
     questions, references, predictions = input_data
 
     for question, reference, prediction in tqdm(zip(questions, references, predictions), total=len(questions)):
 
-        sample_input = "You will be given the question and the reference answer. Treat the reference answer as the golden truth. Please rate the correctness of the generated answer from 1(worst) to 10(best).\n\nQuestion:\n{}\n\nReference Answer:\n{}\n\nGenerated Answer:\n{}\n\n".format(question, reference, prediction)
+        PROMPT_TEMPLATE = """\
+            [Question]
+            {question}
+
+            [Assistant Response]
+            {prediction}
+
+            [Ground Truth Response]
+            {reference}
+
+            [System]
+            Please rate the accuracy of the assistant response based on its alignment with the ground truth response. Your rating should strictly reflect factual correctness:
+            - If the ground truth directly contradicts the assistant's response, the rating must reflect an incorrect answer.
+            - If the ground truth is ambiguous or states 'cannot decide', please rate it as incorrect.
+            - Ratings should range from 1 to 5, where 1 indicates no factual alignment (incorrect) and 5 indicates complete factual alignment (correct).
+            Your response should be formatted as follows:
+            Explanation: (Provide a brief explanation of why the rating was assigned, focusing on factual correctness.)
+            Rating: (int)"""
+        
+        evaluation_prompt = PROMPT_TEMPLATE.format(question=question, prediction=prediction, reference=reference)
 
         messages = [
-            {"role": "system", "content": "You are an expert grader who consistently evaluates on a scale from 1(worst) to 10(best)!"},
-            {"role": "user", "content": sample_input},
+            {"role": "system", "content": "You are an expert grader!"},
+            {"role": "user", "content": evaluation_prompt},
         ]
 
         templated_sample = tokenizer.apply_chat_template(
@@ -42,23 +72,22 @@ def score(model_path, input_data):
             return_tensors="pt",
             tokenize=False,
         )
-        templated_sample = templated_sample + "My rating score is: "
+
         encoded_sample = tokenizer(templated_sample, return_tensors="pt").to(model.device)
 
         outputs = model.generate(
             **encoded_sample,
-            max_new_tokens=10,
+            max_new_tokens=500,
             pad_token_id=tokenizer.eos_token_id,
             eos_token_id=terminators,
-            #do_sample=True,
-            #temperature=0.6,
-            #top_p=0.9,
+            do_sample=False,
         )
+
         response = outputs[0][encoded_sample.input_ids.shape[-1]:]
-        output = tokenizer.decode(response, skip_special_tokens=True)
+        output   = tokenizer.decode(response, skip_special_tokens=True).strip()
 
         try:
-            rate_score = float(output.split()[0])
+            rate_score = float(output.split()[-1])
             success = 1
         except:
             rate_score = 1.0
@@ -68,6 +97,7 @@ def score(model_path, input_data):
             'question'        : question,
             'reference'       : reference,
             'model_prediction': prediction,
+            'judge_response'  : output,
             'rate_score'      : rate_score,
             'success'         : success,
         }
@@ -78,6 +108,6 @@ def score(model_path, input_data):
     avg_score    = sum(all_scores) / len(all_scores)
     success_rate = sum([detail['success'] for detail in all_details]) / len(all_details)
 
-    results = {'llm_score': avg_score, 'success_rate': success_rate, 'details': all_details}
+    judge_results = {'judge_score': avg_score, 'success_rate': success_rate, 'details': all_details}
 
-    return results
+    return judge_results
